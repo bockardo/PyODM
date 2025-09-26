@@ -77,7 +77,7 @@ class TaskInfo(JsonResponse):
         self.name = json['name']
         self.date_created = datetime.utcfromtimestamp(int(json['dateCreated'] / 1000.0))
         self.processing_time = json['processingTime']
-        self.status = TaskStatus(json['status']['code'])
+        self.status = TaskStatus(json['status']['code']) if isinstance(json['status']['code'], int) else TaskStatusStr(json['status']['code'])
         self.last_error = json['status'].get('errorMessage', '')
         self.options = json['options']
         self.images_count = json['imagesCount']
@@ -101,4 +101,13 @@ class TaskStatus(Enum):
     FAILED = 30
     COMPLETED = 40
     CANCELED = 50
+
+class TaskStatusStr(Enum):
+    """Task status
+    """
+    QUEUED = "queued"
+    RUNNING = "running"
+    FAILED = "failed"
+    COMPLETED = "completed"
+    CANCELED = "canceled"
 
