@@ -278,8 +278,8 @@ class Node:
         if isinstance(result, dict) and 'error' in result:
             raise NodeResponseError(result['error'])
         
-        if isinstance(result, dict) and 'uuid' in result:
-            uuid = result['uuid']
+        if isinstance(result, dict) and 'uuid' in result or 'id' in result:
+            uuid = result['uuid'] if 'uuid' in result else result['id']
             progress_event = None
 
             class nonloc:
