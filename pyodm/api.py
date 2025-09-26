@@ -151,7 +151,7 @@ class Node:
 
             if res.status_code == 401:
                 raise NodeResponseError("Unauthorized. Do you need to set a token?")
-            elif res.status_code != 200 and res.status_code != 403:
+            elif res.status_code not in [200, 201, 403]:
                 raise NodeServerError(res.status_code)
 
             if "Content-Type" in res.headers and "application/json" in res.headers['Content-Type']:
@@ -214,7 +214,7 @@ class Node:
         return self.compare_version(node_version, version) >= 0
 
 
-    def create_task(self, files, options={}, name=None, progress_callback=None, skip_post_processing=False, webhook=None, outputs=[], parallel_uploads=10, max_retries=5, retry_timeout=5, task_uuid=None):
+    def create_task(self, files, options={}, name=None, progress_callback=None, skip_post_processing=False, webhook=None, outputs=[], parallel_uploads=10, max_retries=5, retry_timeout=5, task_uuid=None, workspaceSlug=None):
         """Start processing a new task.
         At a minimum you need to pass a list of image paths. All other parameters are optional.
 
@@ -262,6 +262,9 @@ class Node:
         
         if webhook is not None:
             fields['webhook'] = webhook
+        
+        if workspaceSlug is not None:
+            fields['workspaceSlug'] = workspaceSlug
 
         if outputs:
             fields['outputs'] = json.dumps(outputs)
@@ -447,6 +450,8 @@ class Node:
     def handle_task_new_response(self, result):
         if isinstance(result, dict) and 'uuid' in result:
             return Task(self, result['uuid'])
+        elif isinstance(result, dict) and 'id' in result:
+            return Task(self, result['id'])
         elif isinstance(result, dict) and 'error' in result:
             raise NodeResponseError(result['error'])
         else:
